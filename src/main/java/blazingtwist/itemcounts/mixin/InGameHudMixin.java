@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.joml.Matrix3x2fStack;
 
 @Environment(EnvType.CLIENT)
 @Mixin(InGameHud.class)
@@ -86,13 +87,13 @@ public abstract class InGameHudMixin {
 	private void renderTextAt(DrawContext context, ItemCountsConfig.ItemRenderConfig config,
 							  String text, int color, int x, int y, boolean isOnHotbar) {
 		float scaleFactor = config.offset.textScale;
-		MatrixStack matrices = context.getMatrices();
-		matrices.push();
-		matrices.translate(0, ItemCounts.FONT_Y_OFFSET * scaleFactor, 200f);
+		Matrix3x2fStack matrices = context.getMatrices();
+		matrices.pushMatrix();
+		matrices.translate(0, ItemCounts.FONT_Y_OFFSET * scaleFactor);
 		if (isOnHotbar) {
-			matrices.translate(ItemCounts.HOTBAR_X_OFFSET * scaleFactor, 0, 0);
+			matrices.translate(ItemCounts.HOTBAR_X_OFFSET * scaleFactor, 0);
 		}
-		matrices.scale(scaleFactor, scaleFactor, 1);
+		matrices.scale(scaleFactor, scaleFactor);
 
 		context.drawText(
 				client.textRenderer,
@@ -103,23 +104,23 @@ public abstract class InGameHudMixin {
 				true
 		);
 
-		matrices.pop();
+		matrices.popMatrix();
 	}
 
 	@Unique
 	private void renderItemAt(DrawContext context, ItemStack item, int x, int y, float scaleFactor, boolean isOnHotbar, PlayerEntity player, int seed) {
-		MatrixStack contextMatrices = context.getMatrices();
-		contextMatrices.push();
-		contextMatrices.scale(scaleFactor, scaleFactor, scaleFactor);
+		Matrix3x2fStack contextMatrices = context.getMatrices();
+		contextMatrices.pushMatrix();
+		contextMatrices.scale(scaleFactor, scaleFactor);
 
 		if (isOnHotbar) {
-			contextMatrices.translate(ItemCounts.HOTBAR_X_OFFSET, 0, 0);
+			contextMatrices.translate(ItemCounts.HOTBAR_X_OFFSET, 0);
 		}
 		int scaledX = ((int)(x / scaleFactor)) - 8; // -8 to offset the reapplied offset in 'drawItem'...
 		int scaledY = ((int)(y / scaleFactor)) - 8;
 		context.drawItem(player, item, scaledX, scaledY, seed);
 
-		contextMatrices.pop();
+		contextMatrices.popMatrix();
 	}
 
 	@Inject(method = "renderHotbarItem(" +

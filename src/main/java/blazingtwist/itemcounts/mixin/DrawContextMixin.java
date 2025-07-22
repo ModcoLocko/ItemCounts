@@ -34,19 +34,15 @@ public abstract class DrawContextMixin {
 							")I"
 			)
 	)
-	private int redirectDrawItemSlotText(
-			DrawContext instance, TextRenderer textRenderer, String text, int x, int y, int color, boolean shadow
-	) {
+	private void redirectDrawItemSlotText(DrawContext instance, TextRenderer textRenderer, String text, int x, int y, int color, boolean shadow) {
 		boolean isCalledFromHotbarRenderItem = ItemCounts.mixin_drawItemCalledFromRenderHotbarItem;
 		if (ItemCounts.mixin_drawItemCalledFromRenderHotbarItem) {
 			ItemCounts.mixin_drawItemCalledFromRenderHotbarItem = false;
 		}
 
-		if (isCalledFromHotbarRenderItem && !ItemCounts.getConfig().show_vanilla_count) {
-			return 0;
+		if (!isCalledFromHotbarRenderItem || ItemCounts.getConfig().show_vanilla_count) {
+			instance.drawText(textRenderer, text, x, y, color, shadow);
 		}
-
-		return instance.drawText(textRenderer, text, x, y, color, shadow);
 	}
 
 }
